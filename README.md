@@ -19,6 +19,17 @@ parse('./src/**/*.js')
 .catch(error => console.log("error:", error))
 ```
 
+The `comments` output above is an Object with the keys as the file names, and the value an Array of parsed comment lines and comment blocks.
+
+```javascript
+{
+    './example.js': [
+        '### loadURL\n`request -> url -> Promise`\n\n### Description\nLoads the contents of a URL via a GET request, and wraps the request.get in a Promise.\n\n| Param    | Type                 | Description                   |\n| ------   | -------------------- | ----------------------------- |\n| request  | <code>request</code> | A Node request or request-promise module (i.e. require(\'request\')) |\n| url      | <code>String</code>  | The URL you wish to load.     |\n\n### Returns\n<code>Promise</code> - Promise contains either the text content of the GET request or the <code>Error</code>.\n\n### Example\n<pre><code class="language-javascript">\nloadURL\n    (require("request"))\n    ("http://google.com")\n    .then(result => console.log("result:", result))\n    .catch(error => console.log("error:", error))\n</code></pre>\n',
+        '### readFile\n`fs -> filename -> encoding -> Promise`'
+    ]
+}
+```
+
 # How Do I Document Code Correctly?
 
 The best way is to:
