@@ -1,4 +1,4 @@
-process.env.DEBUG="*"
+// process.env.DEBUG="*"
 
 const glob = require('glob')
 const fs = require('fs')
@@ -208,6 +208,12 @@ const parse = fileGlob =>
     .then(tapDebug("parse, done."))
 
 
-parse('./*.js')
-.then(result => log(result))
-.catch(error => console.log("final error:", error))
+module.exports = {
+    codeToMarkdown,
+    parse
+}
+
+
+// parse('./*.js')
+// .then(result => log(result))
+// .catch(error => console.log("final error:", error))
