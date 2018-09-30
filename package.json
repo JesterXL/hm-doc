@@ -1,6 +1,6 @@
 {
   "name": "@jesterxl/hm-doc",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Generates simple markdown documentation from Hindley Milner and optional block comments in JavaScript code.",
   "main": "index.js",
   "scripts": {
