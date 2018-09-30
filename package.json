@@ -6,6 +6,9 @@
   "scripts": {
     "test": "jest --coverage"
   },
+  "bin": {
+    "hm-doc": "./bin/hm-doc.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JesterXL/hm-doc.git"
