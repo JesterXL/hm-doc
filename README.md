@@ -80,7 +80,9 @@ That'll produce markdown that looks like the following:
 ### loadURL
 `request -> url -> Promise`
 
-### Description\nLoads the contents of a URL via a GET request, and wraps the request.get in a Promise.
+### Description
+
+Loads the contents of a URL via a GET request, and wraps the request.get in a Promise.
 
 | Param    | Type                 | Description                   |
 | ------   | -------------------- | ----------------------------- |
