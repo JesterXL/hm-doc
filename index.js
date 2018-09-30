@@ -1,4 +1,4 @@
-// process.env.DEBUG="*"
+#!/usr/bin/env node
 
 const glob = require('glob')
 const fs = require('fs')
@@ -213,7 +213,18 @@ module.exports = {
     parse
 }
 
+if (require.main === module) {
+    const program = require('commander');
 
-// parse('./*.js')
-// .then(result => log(result))
-// .catch(error => console.log("final error:", error))
+    program
+    .version(require('./package.json').version)
+    .option('-f, --files [demFiles]', 'File glob, list of files you want to load and parse comments out of [demFiles]. Example: ./*.js', './*.js')
+    .parse(process.argv)
+    
+    if(isString(program.files) && program.files.length > 0) {
+        parse(program.files)
+        .then(result => console.log(result))
+        .catch(error => console.log("error:", error))
+    }
+}
+
