@@ -4,16 +4,16 @@ Generates simple markdown documentation from Hindley Milner and optional block c
 
 # Installation
 
-`npm i hm-doc --save`
+`npm i @jesterxl/hm-doc --save`
 
 # Usage: Commandline
 
-`npx hm-doc --files example.js`
+`npx @jesterxl/hm-doc --files example.js`
 
 # Usage: Code
 
 ```javascript
-const { parse } = require('hm-doc')
+const { parse } = require('@jesterxl/hm-doc')
 parse('./src/**/*.js')
 .then(comments => console.log("comments:", comments))
 .catch(error => console.log("error:", error))
@@ -96,7 +96,7 @@ Yes. The workflow assumes you're writing Markdown documentation in a README.md f
 
 1. Write your method documentation in your code.
 2. Write your project documentation in `README.hbs`; note it's an `.hbs` file, not an `.md`, although you still write in Markdown. You'll put some [Handlebars](http://handlebarsjs.com/) markup in there for your API.
-3. Run the `hm-doc` cli or the `parse` function.
+3. Run the `@jesterxl/hm-doc` cli or the `parse` function.
 4. Take the text output, inject into the `README.hbs` via Handlebars.
 5. Output to `README.md`.
 
