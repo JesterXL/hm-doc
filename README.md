@@ -255,7 +255,7 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 ### Example
 ```javascript
 parse
-    ('./src/** /*.js) // ignore space after 2 stars
+    ('./src/** /*.js') // ignore space after 2 stars
     .then(console.log)
     .catch(console.log)
 ```
@@ -276,13 +276,13 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 <code>Promise</code> - Promise contains either the text content of the of the rendered Markdown or an error as to why it failed.
 
 ### Example
-<pre><code class="highlight highlight-source-js">
+```javascript
 getMarkdown
     ('./src/** /*.js) // ignore space after 2 stars
     ('README_template.hbs')
     .then(console.log)
     .catch(console.log)
-</code></pre>
+```
 
 ## .writeMarkdownFile
 `glob -> handlebarsTemplateFile -> outputFilename -> Promise`
@@ -302,12 +302,12 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 <code>Promise</code> - Promise contains a success message of the file it wrote, an error as to why it failed.
 
 ### Example
-<pre><code class="highlight highlight-source-js">
+```javascript
 writeMarkdownFile
     ('./src/** /*.js) // ignore space after 2 stars
     ('README_template.hbs')
     ('README.md')
     .then(console.log)
     .catch(console.log)
-</code></pre>
+```
 
