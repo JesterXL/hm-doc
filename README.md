@@ -39,6 +39,10 @@ Same as above, then write your documentation to a file:
 
 `npx hm-doc --files ./src/**/*.js --template README_template.hbs --output README.md`
 
+To see debug information, prefix the command (or set) the `DEBUG` environment variable to `hm-doc`, or `*` to see every module:
+
+`DEBUG="hm-doc" npx hm-doc --files ./src/**/*.js --template README_template.hbs --output README.md`
+
 For more information, type `npx hm-doc --help`.
 
 For using the code directly, see the API docs below. We used `hm-doc` to document `hm-doc`.

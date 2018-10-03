@@ -1,6 +1,6 @@
 const glob = require('glob')
 const fs = require('fs')
-const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find, reduce, has, toPairs } = require('lodash/fp')
+const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find, reduce, has, toPairs, every, forEach, isObject } = require('lodash/fp')
 const HMP = require('hm-parser')
 const { inspect } = require('util')
 const babylon = require('babylon')
@@ -179,6 +179,39 @@ const tapDebug = label => (...args) => {
     return Promise.resolve.apply(Promise, args)
 }
 
+const tapDebugAndShowArgs = label => (...args) => {
+    debug.apply(debug, [label, ...args])
+    return Promise.resolve.apply(Promise, args)
+}
+
+// [jwarden 10.3.2018] NOTE: We're basically finding all comments in the file, and assuming they might possibly be what we're looking for.
+// That is probably not the case, heh, so sometimes HMP will fail, or won't fail but it isn't a Hindley-Milner comment for example.
+// I believe JSDocs uses the "slash star star" to recognize the start of a JSDoc block comment. I didn't want to introduce another
+// commenting format, and rather, keep what developers know. SO... until we get better at parsing the AST Bablylon gives us,
+// we'll just have to add verification steps like this.
+const okLookingHM = o =>
+    isString(get('hm', o))
+    && get('hm', o).length > 0
+
+const hmParsedSuccessfully = o =>
+    isObject(get('hmParsed', o))
+
+const okLookingSignature = o =>
+    isString(get('signature', o))
+    && get('signature', o).length > 0
+
+const legitParsedComment = parsedComment =>
+    every(
+        predicate => predicate(parsedComment),
+        [
+            okLookingHM,
+            hmParsedSuccessfully,
+            okLookingSignature
+        ]
+    )
+
+const filterLegitParsedComments = filter(legitParsedComment)
+
 const codeToMarkdown = code =>
     tapDebug("codeToMarkdown start...")()
     .then(() => Promise.resolve(code))
@@ -206,8 +239,28 @@ const codeToMarkdown = code =>
     .then(typeSignaturesAttached)
     .then(tapDebug("codeToMarkdown, filterFailedParsing..."))
     .then(filterFailedParsing)
+    .then(tapDebug("codeToMarkdown, filterFailedParsing..."))
+    .then(filterLegitParsedComments)
+    .then(tapDebugAndShowArgs("codeToMarkdown, filterLegitParsedComments done"))
     .then(tapDebug("codeToMarkdown, done."))
 
+const cleanEmptyResults = filesObject => {
+    debug("cleanEmptyResults, start:", filesObject)
+    const filenames = Object.keys(filesObject)
+    const cleanedObject = {}
+    forEach(
+        filename => {
+            const parsedComments = filesObject[filename]
+            // console.log("parsedComments:", parsedComments)
+            if(parsedComments.length > 0) {
+                cleanedObject[filename] = parsedComments
+            }
+        },
+        filenames
+    )
+    debug("cleanEmptyResults, end:", cleanedObject)
+    return cleanedObject
+}
 
 /*
 ### Description
@@ -250,7 +303,7 @@ const parse = fileGlob =>
             )
         ))
     .then(markdowns =>
-        debug("parse, markdowns parsed, combining with file names...") ||
+        debug("parse, markdowns parsed, combining with file names: %O", markdowns) ||
         Promise.all([
             loadFilenames(fileGlob),
             markdowns
@@ -260,6 +313,11 @@ const parse = fileGlob =>
         debug("parse, combining filenames and markdown...") ||
         zip(filenames, markdowns))
     .then(fromPairs)
+    .then( result =>
+        debug("parse, cleaning empty results...") ||
+        cleanEmptyResults(result)
+    )
+    .then(tapDebugAndShowArgs("parse done, showing result"))
     .then(tapDebug("parse, done."))
 
 const renderMarkdown = sourceFileContents => data =>
