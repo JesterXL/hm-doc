@@ -98,13 +98,13 @@ Loads the contents of a URL via a GET request, and wraps the request.get in a Pr
 <code>Promise</code> - Promise contains either the text content of the GET request or the <code>Error</code>.
 
 ### Example
-<code class="language-javascript">
+<pre><code class="language-javascript">
 loadURL
     (require('request'))
     ('http://google.com')
     .then(result => console.log("result:", result))
     .catch(error => console.log("error:", error))
-</code>
+</code></pre>
 */
 // loadURL :: request -> url -> Promise
 const loadURL = request => url =>
