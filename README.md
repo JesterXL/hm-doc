@@ -179,9 +179,9 @@ Below are all the functions we support in the public API.
 Email us, we're here to help!
 ```
 
-Notice the weird, double squiggly braces with `#hmdoc` in the middle under the API section. That's our custom Handlebars function. When you convert Handlebars to Markdown, it'll replace those weird tags with all your API documentation. If we save this file `README_template.hbs`, we'll then run our `hm-docs` command like so:
+Notice the weird, double squiggly braces with `#hmdoc` in the middle under the API section. That's our custom Handlebars function. When you convert Handlebars to Markdown, it'll replace those weird tags with all your API documentation. If we save this file `README_template.hbs`, we'll then run our `hm-doc` command like so:
 
-`hm-docs -f ./src/**/*.js -t README_template.hbs -o README.md`
+`hm-doc -f ./src/**/*.js -t README_template.hbs -o README.md`
 
 If we run that, then open it up, it'll render close to this:
 
