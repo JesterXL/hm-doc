@@ -14,6 +14,7 @@ It will then inject the text there for you. The output string will be
 a document you can write out as an `.md` file. --> 
 ## ./test/example.js
 
+
 ## .loadURL
 `request -> url -> Promise`
 
@@ -38,6 +39,8 @@ loadURL
     .catch(error => console.log("error:", error))
 </code></pre>
 
+
+
 Or you can do tabs:
 
     loadURL
@@ -47,6 +50,7 @@ Or you can do tabs:
         .catch(error => console.log("error:", error))
 
 And that'll make a code block.
+
 
 ## .readFile
 `fs -> filename -> encoding -> Promise`

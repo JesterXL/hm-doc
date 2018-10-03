@@ -53,3 +53,6 @@ const readFile = fs => filename => encoding =>
             : success(data)
         )
     )
+
+// this is a random comment
+const alwaysTrue = () => true

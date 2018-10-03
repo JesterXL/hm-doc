@@ -1,6 +1,6 @@
 const glob = require('glob')
 const fs = require('fs')
-const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find, reduce, first, last, toPairs } = require('lodash/fp')
+const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find, reduce, has, toPairs } = require('lodash/fp')
 const HMP = require('hm-parser')
 const { inspect } = require('util')
 const babylon = require('babylon')
@@ -131,16 +131,38 @@ const trimmedWhitespace =
         item => set('hm', trim(get('hm', item)), item)
     )
 
-
+const safeHMPParse = string => {
+    try {
+        const data = HMP.parse(string)
+        return { ok: true, data }
+    } catch(error) {
+        return { ok: false, error }
+    }
+}
+// [jwarden 10.3.2018] TODO/FIXME: Should look at proceeding line as random 1 line comments will break lol.
+// For now, will attempt to if see it's parseable. If not, return state that it should be disposed of.
 const parsedComments = 
     map(
-        item => set('hmParsed', HMP.parse(get('hm', item)), item),
+        item => {
+            const { ok, data, error } = safeHMPParse(get('hm', item))
+            if(ok) {
+                return set('hmParsed', data, item)
+            } else {
+                return set('hmParseFailure', error, item)
+            }
+        }
+    )
+
+const removeFailedCommentParsing =
+    filter(
+        item => has('hmParseFailure', item) === false
     )
 
 const typeSignaturesAttached = 
     map(
         item => set('signature', trim(get('hm', item).split('::')[1]), item)
     )
+
 const filterFailedParsing =
     filter(
         item => isNil(item) === false
@@ -178,6 +200,8 @@ const codeToMarkdown = code =>
     .then(trimmedWhitespace)
     .then(tapDebug("codeToMarkdown, parsedComments..."))
     .then(parsedComments)
+    .then(tapDebug("codeToMarkdown, removeFailedCommentParsing..."))
+    .then(removeFailedCommentParsing)
     .then(tapDebug("codeToMarkdown, typeSignaturesAttached..."))
     .then(typeSignaturesAttached)
     .then(tapDebug("codeToMarkdown, filterFailedParsing..."))
