@@ -274,12 +274,12 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 <code>Promise</code> - Promise contains a list of parsed comments, or an Error as to why it failed.
 
 ### Example
-<pre><code class="highlight highlight-source-js">
+```javascript
 parse
     ('./src/** /*.js) // ignore space after 2 stars
     .then(console.log)
     .catch(console.log)
-</code></pre>
+```
 */
 // parse :: glob -> Promise
 const parse = fileGlob =>

@@ -234,6 +234,7 @@ Pretty rad, right?
 # API Documentation
 
 Below is the `hm-doc` API if you wish to use the code directly instead of the command line.
+
 ## index.js
 
 
@@ -252,12 +253,12 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 <code>Promise</code> - Promise contains a list of parsed comments, or an Error as to why it failed.
 
 ### Example
-<pre><code class="highlight highlight-source-js">
+```javascript
 parse
     ('./src/** /*.js) // ignore space after 2 stars
     .then(console.log)
     .catch(console.log)
-</code></pre>
+```
 
 ## .getMarkdown
 `glob -> handlebarsTemplateFile -> Promise`
@@ -309,3 +310,4 @@ writeMarkdownFile
     .then(console.log)
     .catch(console.log)
 </code></pre>
+
