@@ -1,12 +1,46 @@
-#!/usr/bin/env node
-
 const glob = require('glob')
 const fs = require('fs')
-const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find } = require('lodash/fp')
+const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find, reduce, first, last, toPairs } = require('lodash/fp')
 const HMP = require('hm-parser')
 const { inspect } = require('util')
 const babylon = require('babylon')
+const handlebars = require('handlebars')
 const debug = require('debug')('hm-doc')
+
+const getDescription =
+    get('description')
+
+const legitDescription = o =>
+    isString(getDescription(o)) 
+    && getDescription(o).length > 0
+
+const parsedCommentToMarkdown = comment => {
+    let base = `## .${get('hmParsed.name', comment)}
+\`${get('signature', comment)}\``
+    if(legitDescription(comment)) {
+        base = `${base}
+
+${getDescription(comment)}`
+    }
+    return base
+}
+
+const combineComments = filename => comments =>
+    reduce(
+        (commentsString, comment) =>
+            `${commentsString}${parsedCommentToMarkdown(comment)}`,
+        `## ${filename}\n\n`,
+        comments
+    )
+
+handlebars.registerHelper('hmdoc', (items, options) =>
+    reduce(
+        (acc, [filename, comments] ) =>
+            combineComments(filename)(comments),
+        '',
+        toPairs(get('data.root', items))
+    )
+)
 
 const loadFilenames = stringGlob =>
     debug("loadFilenames, stringGlob:", stringGlob) ||
@@ -36,7 +70,6 @@ const readFile = filename =>
     debug("readFile, filename: %o", filename) ||
     new Promise((success, failure) =>
         fs.readFile(filename, (err, data) =>
-            debug("readFile result, err: %O, data (truncated 20 characters or less): %o", err, truncateText(data.toString())) ||
             err
             ? failure(err)
             : success(data.toString())
@@ -113,30 +146,10 @@ const filterFailedParsing =
         item => isNil(item) === false
     )
 
-const getDescription =
-    get('description')
-
-const legitDescription = o =>
-    isString(getDescription(o)) 
-    && getDescription(o).length > 0
-
-const docToMarkdown = o => {
-    debug('docToMarkdown')
-    const base = `### ${get('hmParsed.name', o)}
-\`${get('signature', o)}\``
-    if(legitDescription(o)) {
-        debug("docToMarkdown, has a description, so appending that to the Hindley Milner declaration.")
-        return `${base}
-${getDescription(o)}`
-    }
-    debug("docToMarkdown, no description found, using the Hindley Milner declaration.")
-    return base
+const tapConsole = label => (...args) => {
+    console.log.apply(console, [`${label}:`, ...args])
+    return Promise.resolve.apply(Promise, args)
 }
-
-const getMarkdownDocumentation =
-    map(
-        docToMarkdown
-    )
 
 const tapDebug = label => (...args) => {
     // debug.apply(debug, [label, ...args])
@@ -169,11 +182,29 @@ const codeToMarkdown = code =>
     .then(typeSignaturesAttached)
     .then(tapDebug("codeToMarkdown, filterFailedParsing..."))
     .then(filterFailedParsing)
-    .then(tapDebug("codeToMarkdown, getMarkdownDocumentation..."))
-    .then(getMarkdownDocumentation)
     .then(tapDebug("codeToMarkdown, done."))
 
 
+/*
+### Description
+Reads a file glob and parses all comments out and all Hindley-Milner type signatures it finds in the file(s). You'll get an Array of Objects that have the filename as the key, and the value is an Array of comment lines and comment blocks it found.
+
+| Param                       | Type                | Description                   |
+| --------------------------- | ------------------- | ----------------------------- |
+| glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+
+### Returns
+<code>Promise</code> - Promise contains a list of parsed comments, or an Error as to why it failed.
+
+### Example
+<code class="language-javascript">
+parse
+    ('./src/** /*.js) // ignore space after 2 stars
+    .then(console.log)
+    .catch(console.log)
+</code>
+*/
+// parse :: glob -> Promise
 const parse = fileGlob =>
     debug("parse, fileGlob: %s", fileGlob) ||
     loadFilenames(fileGlob)
@@ -207,8 +238,105 @@ const parse = fileGlob =>
     .then(fromPairs)
     .then(tapDebug("parse, done."))
 
+const renderMarkdown = sourceFileContents => data =>
+        handlebars.compile
+            (sourceFileContents)
+            (data)
+
+const readFileToString = filename =>
+    new Promise((success, failure) =>
+        fs.readFile(filename, (error, data) =>
+            err
+            ? failure(error)
+            : success(data.toString())
+        )
+    )
+
+const writeFile = filename => data =>
+    new Promise((success, failure) =>
+        fs.writeFile(filename, data, err =>
+            err
+            ? failure(err)
+            : success(`Successfully wrote filename: ${filename}`)
+        )
+    )
+
+/*
+### Description
+Reads a file glob, parses all comments out and all Hindley-Milner type signatures, reads your Handlebars template, compiles it with the parsed comments, and prints out the compiled text.
+
+| Param                       | Type                | Description                   |
+| --------------------------- | ------------------- | ----------------------------- |
+| glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| handlebarsTemplateFile      | <code>String</code> | Filepath to the Handlebars template file you want to inject your code comments into. It should have a string {{#hmdoc}}{{/hmdoc}} somewhere in there; this is where hm-doc will render the API documentation. See http://handlebarsjs.com/ for more information.   |
+
+### Returns
+<code>Promise</code> - Promise contains either the text content of the of the rendered Markdown or an error as to why it failed.
+
+### Example
+<code class="language-javascript">
+getMarkdown
+    ('./src/** /*.js) // ignore space after 2 stars
+    ('README_template.hbs')
+    .then(console.log)
+    .catch(console.log)
+</code>
+*/
+// getMarkdown :: glob -> handlebarsTemplateFile -> Promise
+const getMarkdown = glob => handlebarsTemplateFile =>
+    tapDebug("getMarkdown, looking for glob: %s, handlebarsTemplateFile: %s", glob, handlebarsTemplateFile)()
+    .then(() => Promise.all([
+        parse(glob),
+        readFile(handlebarsTemplateFile)
+    ]))
+    .then(tapDebug("getMarkdown, parsed glob and read template file, rendering markdown..."))
+    .then( ([ data, templateString ]) =>
+        renderMarkdown
+            (templateString)
+            (data)
+    )
+    .then(tapDebug("getMarkdown, rendered markdown."))
+
+/*
+### Description
+
+Reads a file glob, parses all comments out and all Hindley-Milner type signatures, reads your Handlebars template, compiles it with the parsed comments, and finally writes that compiled text to a file.
+
+| Param                       | Type                | Description                   |
+| --------------------------- | ------------------- | ----------------------------- |
+| glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| handlebarsTemplateFile      | <code>String</code> | Filepath to the Handlebars template file you want to inject your code comments into. It should have a string {{#hmdoc}}{{/hmdoc}} somewhere in there; this is where hm-doc will render the API documentation. See http://handlebarsjs.com/ for more information.   |
+| outputFilename              | <code>String</code> | File you want to write your rendered Markdown to, probably `README.md`.
+
+### Returns
+<code>Promise</code> - Promise contains a success message of the file it wrote, an error as to why it failed.
+
+### Example
+<code class="language-javascript">
+writeMarkdownFile
+    ('./src/** /*.js) // ignore space after 2 stars
+    ('README_template.hbs')
+    ('README.md')
+    .then(console.log)
+    .catch(console.log)
+</code>
+*/
+// writeMarkdownFile :: glob -> handlebarsTemplateFile -> outputFilename -> Promise
+const writeMarkdownFile = glob => handlebarsTemplateFile => outputFilename =>
+    tapDebug("writeMarkdownFile, looking for glob: %s, handlebarsTemplateFile: %s, outputFilename: %s", glob, handlebarsTemplateFile, outputFilename)()
+    .then(() => getMarkdown(glob)(handlebarsTemplateFile))
+    .then(tapDebug("writeMarkdownFile, markdown rendered, writing file..."))
+    .then( markdown =>
+        writeFile
+            (outputFilename)
+            (markdown)
+    )
+
 
 module.exports = {
     codeToMarkdown,
-    parse
+    parse,
+    renderMarkdown,
+    getMarkdown,
+    writeMarkdownFile
 }
