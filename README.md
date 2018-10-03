@@ -62,7 +62,7 @@ And here's how you'd do it in JavaScript using `hm-doc`:
 
 ```javascript
 /* Determine if an array is empty.
-    isEmpty empty == True
+    isEmpty([]) === true
 */
 // isEmpty :: Array a -> Bool
 const isEmpty = array =>
