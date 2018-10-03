@@ -14,7 +14,7 @@
 - [Installation](#installation)
 - [Commandline Usage](#commandline-usage)
 - [Prior-Art](#prior-art)
-- [How Do I Document My Code?](#how-do-i-document-my-code?)
+- [How Do I Document My Code?](#how-do-i-document-my-code)
 - [API Documentation](#api-documentation)
 
 # Installation
