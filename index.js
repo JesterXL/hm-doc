@@ -197,12 +197,12 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 <code>Promise</code> - Promise contains a list of parsed comments, or an Error as to why it failed.
 
 ### Example
-<code class="language-javascript">
+<pre><code class="language-javascript">
 parse
     ('./src/** /*.js) // ignore space after 2 stars
     .then(console.log)
     .catch(console.log)
-</code>
+</code></pre>
 */
 // parse :: glob -> Promise
 const parse = fileGlob =>
@@ -274,13 +274,13 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 <code>Promise</code> - Promise contains either the text content of the of the rendered Markdown or an error as to why it failed.
 
 ### Example
-<code class="language-javascript">
+<pre><code class="language-javascript">
 getMarkdown
     ('./src/** /*.js) // ignore space after 2 stars
     ('README_template.hbs')
     .then(console.log)
     .catch(console.log)
-</code>
+</code></pre>
 */
 // getMarkdown :: glob -> handlebarsTemplateFile -> Promise
 const getMarkdown = glob => handlebarsTemplateFile =>
@@ -312,14 +312,14 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 <code>Promise</code> - Promise contains a success message of the file it wrote, an error as to why it failed.
 
 ### Example
-<code class="language-javascript">
+<pre><code class="language-javascript">
 writeMarkdownFile
     ('./src/** /*.js) // ignore space after 2 stars
     ('README_template.hbs')
     ('README.md')
     .then(console.log)
     .catch(console.log)
-</code>
+</code></pre>
 */
 // writeMarkdownFile :: glob -> handlebarsTemplateFile -> outputFilename -> Promise
 const writeMarkdownFile = glob => handlebarsTemplateFile => outputFilename =>
