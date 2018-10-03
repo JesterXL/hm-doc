@@ -28,7 +28,7 @@ ${getDescription(comment)}`
 const combineComments = filename => comments =>
     reduce(
         (commentsString, comment) =>
-            `${commentsString}${parsedCommentToMarkdown(comment)}`,
+            `${commentsString}\n${parsedCommentToMarkdown(comment)}`,
         `## ${filename}\n\n`,
         comments
     )

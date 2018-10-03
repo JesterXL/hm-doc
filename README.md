@@ -233,6 +233,7 @@ Below is the `hm-doc` API if you wish to use the code directly instead of the co
 
 ## index.js
 
+
 ## .parse
 `glob -> Promise`
 
@@ -254,6 +255,7 @@ parse
     .then(console.log)
     .catch(console.log)
 </code>
+
 ## .getMarkdown
 `glob -> handlebarsTemplateFile -> Promise`
 
@@ -277,6 +279,7 @@ getMarkdown
     .then(console.log)
     .catch(console.log)
 </code>
+
 ## .writeMarkdownFile
 `glob -> handlebarsTemplateFile -> outputFilename -> Promise`
 
