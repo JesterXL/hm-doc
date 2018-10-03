@@ -278,7 +278,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 ### Example
 ```javascript
 getMarkdown
-    ('./src/** /*.js) // ignore space after 2 stars
+    ('./src/** /*.js') // ignore space after 2 stars
     ('README_template.hbs')
     .then(console.log)
     .catch(console.log)
@@ -304,7 +304,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 ### Example
 ```javascript
 writeMarkdownFile
-    ('./src/** /*.js) // ignore space after 2 stars
+    ('./src/** /*.js') // ignore space after 2 stars
     ('README_template.hbs')
     ('README.md')
     .then(console.log)
