@@ -274,7 +274,7 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 <code>Promise</code> - Promise contains a list of parsed comments, or an Error as to why it failed.
 
 ### Example
-<pre><code class="language-javascript">
+<pre><code class="highlight highlight-source-js">
 parse
     ('./src/** /*.js) // ignore space after 2 stars
     .then(console.log)
@@ -356,7 +356,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 <code>Promise</code> - Promise contains either the text content of the of the rendered Markdown or an error as to why it failed.
 
 ### Example
-<pre><code class="language-javascript">
+<pre><code class="highlight highlight-source-js">
 getMarkdown
     ('./src/** /*.js) // ignore space after 2 stars
     ('README_template.hbs')
@@ -394,7 +394,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 <code>Promise</code> - Promise contains a success message of the file it wrote, an error as to why it failed.
 
 ### Example
-<pre><code class="language-javascript">
+<pre><code class="highlight highlight-source-js">
 writeMarkdownFile
     ('./src/** /*.js) // ignore space after 2 stars
     ('README_template.hbs')
