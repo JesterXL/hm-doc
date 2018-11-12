@@ -1,0 +1,43 @@
+// {
+//       "env": {
+//         "es6": true
+//       },
+//       "plugins": [
+//         "fp-jxl"
+//       ],
+//       "rules": {
+//         "fp-jxl/explicit-return": "off",
+//         "fp-jxl/must-return": "off",
+//         "fp-jxl/no-arguments": "error",
+//         "fp-jxl/no-class": "error",
+//         "fp-jxl/no-delete": "error",
+//         "fp-jxl/no-events": "error",
+//         "fp-jxl/no-exceptions": "off",
+//         "fp-jxl/no-exports": "off",
+//         "fp-jxl/no-function-expressions": "off",
+//         "fp-jxl/no-get-set": "error",
+//         "fp-jxl/no-ifs": "off",
+//         "fp-jxl/no-imports": "off",
+//         "fp-jxl/no-instanceofs": "off",
+//         "fp-jxl/no-let": "error",
+//         "fp-jxl/no-loops": "error",
+//         "fp-jxl/no-mutating-assign": "error",
+//         "fp-jxl/no-mutating-methods": "error",
+//         "fp-jxl/no-mutation": "error",
+//         "fp-jxl/no-new": "off",
+//         "fp-jxl/no-nil": "error",
+//         "fp-jxl/no-nulls": "off",
+//         "fp-jxl/no-proxy": "error",
+//         "fp-jxl/no-reassigns": "off",
+//         "fp-jxl/no-rest-parameters": "error",
+//         "fp-jxl/no-switches": "off",
+//         "fp-jxl/no-this": "error",
+//         "fp-jxl/no-throw": "error",
+//         "fp-jxl/no-typeofs": "off",
+//         "fp-jxl/no-undefined": "off",
+//         "fp-jxl/no-unused-expression": "error",
+//         "fp-jxl/no-valueof-field": "error",
+//         "fp-jxl/no-variable-declarations": "off",
+//         "no-var": "error"
+//       }
+//   }
