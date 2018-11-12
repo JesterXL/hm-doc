@@ -29,19 +29,23 @@ See if it installed ok:
 
 Parse all code and comments in your `src` directory:
 
-`npx hm-doc --files ./src/**/*.js`
+`npx hm-doc --files './src/**/*.js'`
+
+To exclude a directory, add an ignore (-i for short):
+
+`npx hm-doc --files './src/**/*.js' --ignore './src/**/examples'`
 
 Same as above, then put into a Handlebars template, then show in your Terminal:
 
-`npx hm-doc --files ./src/**/*.js --template README_template.hbs`
+`npx hm-doc --files './src/**/*.js' --template README_template.hbs`
 
 Same as above, then write your documentation to a file:
 
-`npx hm-doc --files ./src/**/*.js --template README_template.hbs --output README.md`
+`npx hm-doc --files './src/**/*.js' --template README_template.hbs --output README.md`
 
 To see debug information, prefix the command (or set) the `DEBUG` environment variable to `hm-doc`, or `*` to see every module:
 
-`DEBUG="hm-doc" npx hm-doc --files ./src/**/*.js --template README_template.hbs --output README.md`
+`DEBUG="hm-doc" npx hm-doc --files './src/**/*.js' --template README_template.hbs --output README.md`
 
 For more information, type `npx hm-doc --help`.
 
@@ -185,7 +189,7 @@ Email us, we're here to help!
 
 Notice the weird, double squiggly braces with `#hmdoc` in the middle under the API section. That's our custom Handlebars function. When you convert Handlebars to Markdown, it'll replace those weird tags with all your API documentation. If we save this file `README_template.hbs`, we'll then run our `hm-doc` command like so:
 
-`hm-doc -f ./src/**/*.js -t README_template.hbs -o README.md`
+`hm-doc -f './src/**/*.js' -t README_template.hbs -o README.md`
 
 If we run that, then open it up, it'll render close to this:
 
@@ -234,12 +238,11 @@ Pretty rad, right?
 # API Documentation
 
 Below is the `hm-doc` API if you wish to use the code directly instead of the command line.
-
 ## index.js
 
 
 ## .parse
-`glob -> Promise`
+`glob -> globOptions -> Promise`
 
 
 ### Description
@@ -248,6 +251,7 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 | Param                       | Type                | Description                   |
 | --------------------------- | ------------------- | ----------------------------- |
 | glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| globOptions                 | <code>Object</code> | Glob options Object. Feel free to use {} as default, else refer to the glob documentation on what options you can use. https://github.com/isaacs/node-glob#options
 
 ### Returns
 <code>Promise</code> - Promise contains a list of parsed comments, or an Error as to why it failed.
@@ -256,12 +260,13 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 ```javascript
 parse
     ('./src/** /*.js') // ignore space after 2 stars
+    ({ ignore: 'example' })
     .then(console.log)
     .catch(console.log)
 ```
 
 ## .getMarkdown
-`glob -> handlebarsTemplateFile -> Promise`
+`glob -> globOptions -> handlebarsTemplateFile -> Promise`
 
 
 ### Description
@@ -270,6 +275,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 | Param                       | Type                | Description                   |
 | --------------------------- | ------------------- | ----------------------------- |
 | glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| globOptions                 | <code>Object</code> | Glob options Object. Feel free to use {} as default, else refer to the glob documentation on what options you can use. https://github.com/isaacs/node-glob#options
 | handlebarsTemplateFile      | <code>String</code> | Filepath to the Handlebars template file you want to inject your code comments into. It should have a string {{#hmdoc}}{{/hmdoc}} somewhere in there; this is where hm-doc will render the API documentation. See http://handlebarsjs.com/ for more information.   |
 
 ### Returns
@@ -279,6 +285,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 ```javascript
 getMarkdown
     ('./src/** /*.js') // ignore space after 2 stars
+    ({ ignore: './examples' })
     ('README_template.hbs')
     .then(console.log)
     .catch(console.log)
@@ -295,6 +302,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 | Param                       | Type                | Description                   |
 | --------------------------- | ------------------- | ----------------------------- |
 | glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| globOptions                 | <code>Object</code> | Glob options Object. Feel free to use {} as default, else refer to the glob documentation on what options you can use. https://github.com/isaacs/node-glob#options
 | handlebarsTemplateFile      | <code>String</code> | Filepath to the Handlebars template file you want to inject your code comments into. It should have a string {{#hmdoc}}{{/hmdoc}} somewhere in there; this is where hm-doc will render the API documentation. See http://handlebarsjs.com/ for more information.   |
 | outputFilename              | <code>String</code> | File you want to write your rendered Markdown to, probably `README.md`.
 
@@ -305,6 +313,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 ```javascript
 writeMarkdownFile
     ('./src/** /*.js') // ignore space after 2 stars
+    ({ ignore: '' })
     ('README_template.hbs')
     ('README.md')
     .then(console.log)

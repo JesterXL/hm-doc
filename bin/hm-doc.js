@@ -7,6 +7,7 @@ program
 .version(require('../package.json').version, '-v, --version')
 .description('Writes Hindle-Milner parsed documentation and markdown.')
 .option('-f, --files [demFiles]', 'File glob, list of files you want to load and parse comments out of [demFiles]. Example: ./*.js')
+.option('-i, --ignore [demFiles]', 'File glob to ignore, list of files/folders you want to ignore and not include in documentation. Example: ./*.js')
 .option('-t, --template [handlebarsTemplate]', 'Handlebars template file [handlebarsTemplate]. Example: ./README.hbs')
 .option('-o, --output [outputFile]', '(Optional) Markdown file you would like to output to.')
 .parse(process.argv)
@@ -14,6 +15,15 @@ program
 const hasFiles = program =>
     isString(program.files)
     && program.files.length > 0
+
+const hasIgnore = program =>
+    isString(program.ignore)
+    && program.ignore.length > 0
+
+const getIgnoreOrDefault = program =>
+    hasIgnore(program)
+    ? program.ignore
+    : ''
 
 const hasTemplate = program =>
     isString(program.template)
@@ -59,12 +69,14 @@ if(hasEverything(program)) {
 } else if(hasJustFilesAndTemplate(program)) {
     getMarkdown
         (program.files)
+        ({ignore: getIgnoreOrDefault(program)})
         (program.template)
     .then(console.log)
     .catch(console.log)
 } else if(hasJustFiles(program)) {
     parse
         (program.files)
+        ({ignore: getIgnoreOrDefault(program)})
     .then(console.log)
     .catch(console.log)
 } else {

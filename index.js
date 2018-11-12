@@ -42,10 +42,10 @@ handlebars.registerHelper('hmdoc', (items, options) =>
     )
 )
 
-const loadFilenames = stringGlob =>
-    debug("loadFilenames, stringGlob:", stringGlob) ||
+const loadFilenames = stringGlob => options =>
+    debug("loadFilenames, stringGlob:", stringGlob, ", options:", options) ||
     new Promise((success, failure) =>
-        glob(stringGlob, (err, files) =>
+        glob(stringGlob, options, (err, files) =>
             debug("loadFilenames result, err: %o, files: %O", err, files) ||
             err
             ? failure(err)
@@ -118,7 +118,7 @@ const toTypeAndDocumentationPair =
 
 const stripAST =
     map(
-        item => ({ hm: get('hm.value', item), description: get('description.value', item) }),
+        item => ({ hm: get('hm.value', item), description: get('description.value', item) })
     )
 
 const trimmedStars =
@@ -269,6 +269,7 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 | Param                       | Type                | Description                   |
 | --------------------------- | ------------------- | ----------------------------- |
 | glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| globOptions                 | <code>Object</code> | Glob options Object. Feel free to use {} as default, else refer to the glob documentation on what options you can use. https://github.com/isaacs/node-glob#options
 
 ### Returns
 <code>Promise</code> - Promise contains a list of parsed comments, or an Error as to why it failed.
@@ -277,14 +278,15 @@ Reads a file glob and parses all comments out and all Hindley-Milner type signat
 ```javascript
 parse
     ('./src/** /*.js') // ignore space after 2 stars
+    ({ ignore: 'example' })
     .then(console.log)
     .catch(console.log)
 ```
 */
-// parse :: glob -> Promise
-const parse = fileGlob =>
+// parse :: glob -> globOptions -> Promise
+const parse = fileGlob => fileGlobOptions =>
     debug("parse, fileGlob: %s", fileGlob) ||
-    loadFilenames(fileGlob)
+    loadFilenames(fileGlob)(fileGlobOptions)
     .then(files =>
         debug("parse, files loaded, about to read them: %o", files) ||
         Promise.all(
@@ -305,7 +307,7 @@ const parse = fileGlob =>
     .then(markdowns =>
         debug("parse, markdowns parsed, combining with file names: %O", markdowns) ||
         Promise.all([
-            loadFilenames(fileGlob),
+            loadFilenames(fileGlob)(fileGlobOptions),
             markdowns
         ])
     )
@@ -350,6 +352,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 | Param                       | Type                | Description                   |
 | --------------------------- | ------------------- | ----------------------------- |
 | glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| globOptions                 | <code>Object</code> | Glob options Object. Feel free to use {} as default, else refer to the glob documentation on what options you can use. https://github.com/isaacs/node-glob#options
 | handlebarsTemplateFile      | <code>String</code> | Filepath to the Handlebars template file you want to inject your code comments into. It should have a string {{#hmdoc}}{{/hmdoc}} somewhere in there; this is where hm-doc will render the API documentation. See http://handlebarsjs.com/ for more information.   |
 
 ### Returns
@@ -359,16 +362,17 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 ```javascript
 getMarkdown
     ('./src/** /*.js') // ignore space after 2 stars
+    ({ ignore: './examples' })
     ('README_template.hbs')
     .then(console.log)
     .catch(console.log)
 ```
 */
-// getMarkdown :: glob -> handlebarsTemplateFile -> Promise
-const getMarkdown = glob => handlebarsTemplateFile =>
-    tapDebug("getMarkdown, looking for glob: %s, handlebarsTemplateFile: %s", glob, handlebarsTemplateFile)()
+// getMarkdown :: glob -> globOptions -> handlebarsTemplateFile -> Promise
+const getMarkdown = glob => globOptions => handlebarsTemplateFile =>
+    tapDebug("getMarkdown, looking for glob: %s, handlebarsTemplateFile: %s", glob, globOptions, handlebarsTemplateFile)()
     .then(() => Promise.all([
-        parse(glob),
+        parse(glob)(globOptions),
         readFile(handlebarsTemplateFile)
     ]))
     .then(tapDebug("getMarkdown, parsed glob and read template file, rendering markdown..."))
@@ -387,6 +391,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 | Param                       | Type                | Description                   |
 | --------------------------- | ------------------- | ----------------------------- |
 | glob                        | <code>String</code> | A glob String, like "example.js" or "./folder/file.js" or for all files in `src`, "./src/** /*.js (remove the space after the 2 stars, heh). See glob for more information: https://www.npmjs.com/package/glob |
+| globOptions                 | <code>Object</code> | Glob options Object. Feel free to use {} as default, else refer to the glob documentation on what options you can use. https://github.com/isaacs/node-glob#options
 | handlebarsTemplateFile      | <code>String</code> | Filepath to the Handlebars template file you want to inject your code comments into. It should have a string {{#hmdoc}}{{/hmdoc}} somewhere in there; this is where hm-doc will render the API documentation. See http://handlebarsjs.com/ for more information.   |
 | outputFilename              | <code>String</code> | File you want to write your rendered Markdown to, probably `README.md`.
 
@@ -397,6 +402,7 @@ Reads a file glob, parses all comments out and all Hindley-Milner type signature
 ```javascript
 writeMarkdownFile
     ('./src/** /*.js') // ignore space after 2 stars
+    ({ ignore: '' })
     ('README_template.hbs')
     ('README.md')
     .then(console.log)
@@ -404,9 +410,9 @@ writeMarkdownFile
 ```
 */
 // writeMarkdownFile :: glob -> handlebarsTemplateFile -> outputFilename -> Promise
-const writeMarkdownFile = glob => handlebarsTemplateFile => outputFilename =>
+const writeMarkdownFile = glob => globOptions => handlebarsTemplateFile => outputFilename =>
     tapDebug("writeMarkdownFile, looking for glob: %s, handlebarsTemplateFile: %s, outputFilename: %s", glob, handlebarsTemplateFile, outputFilename)()
-    .then(() => getMarkdown(glob)(handlebarsTemplateFile))
+    .then(() => getMarkdown(glob)(globOptions)(handlebarsTemplateFile))
     .then(tapDebug("writeMarkdownFile, markdown rendered, writing file..."))
     .then( markdown =>
         writeFile

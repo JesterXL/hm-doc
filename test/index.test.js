@@ -2,7 +2,7 @@ const { parse, writeMarkdownFile } = require('..')
 const isEmpty = require('lodash/fp/isEmpty')
 
 test('parsing example gives us good markdown', done => {
-    parse('./test/example.js')
+    parse('./test/example.js')({})
     .then(result => {
         // console.log("result:", result)
         const has2Comments = result['./test/example.js'].length === 2
@@ -13,7 +13,7 @@ test('parsing example gives us good markdown', done => {
 })
 
 test("parse a file that has comments that don't look like ours results in an empty Object", done => {
-    parse('./test/cray.js')
+    parse('./test/cray.js')({})
     .then(result => {
         // console.log("result:", result)
         expect(isEmpty(result)).toBe(true)
