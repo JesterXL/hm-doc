@@ -23,7 +23,7 @@ test("parse a file that has comments that don't look like ours results in an emp
 })
 
 test('writeMarkdownFile gives us a good readme', done => {
-    writeMarkdownFile('./test/example.js')('./test/example.hbs')('./test/example.md')
+    writeMarkdownFile('./test/example.js')({})('./test/example.hbs')('./test/example.md')
     .then(result => {
         expect(result).toBe('Successfully wrote filename: ./test/example.md')
         done()

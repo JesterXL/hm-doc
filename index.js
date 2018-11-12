@@ -1,6 +1,6 @@
 const glob = require('glob')
 const fs = require('fs')
-const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find, reduce, has, toPairs, every, forEach, isObject } = require('lodash/fp')
+const { map, filter, isNil, isString, trim, trimChars, zip, fromPairs, set, get, find, reduce, has, toPairs, every, forEach, isObject, forOwn } = require('lodash/fp')
 const HMP = require('hm-parser')
 const { inspect } = require('util')
 const babylon = require('babylon')
@@ -15,10 +15,10 @@ const legitDescription = o =>
     && getDescription(o).length > 0
 
 const parsedCommentToMarkdown = comment => {
-    let base = `## .${get('hmParsed.name', comment)}
+    const base = `## .${get('hmParsed.name', comment)}
 \`${get('signature', comment)}\``
     if(legitDescription(comment)) {
-        base = `${base}
+        return `${base}
 
 ${getDescription(comment)}`
     }
@@ -33,7 +33,7 @@ const combineComments = filename => comments =>
         comments
     )
 
-handlebars.registerHelper('hmdoc', (items, options) =>
+const registerResult = handlebars.registerHelper('hmdoc', (items, options) =>
     reduce(
         (acc, [filename, comments] ) =>
             combineComments(filename)(comments),
@@ -78,14 +78,14 @@ const readFile = filename =>
 
 const log = o => console.log(inspect(o, {depth: 8, colors: true}))
 
-const parseCode = code => {
+const parseCode = code => { // eslint-disable-line fp-jxl/no-nil
     try {
-        debug("parseCode, code:", truncateText(code))
+        debug("parseCode, code:", truncateText(code)) // eslint-disable-line fp-jxl/no-unused-expression
         const data = babylon.parse(code)
-        debug("parseCode, successfully parsed via babylon.")
+        debug("parseCode, successfully parsed via babylon.") // eslint-disable-line fp-jxl/no-unused-expression
         return Promise.resolve(data)
     } catch(error) {
-        debug("parseCode failed, error: %O", error)
+        debug("parseCode failed, error: %O", error) // eslint-disable-line fp-jxl/no-unused-expression
         return Promise.reject(error)
     }
 }
@@ -131,7 +131,7 @@ const trimmedWhitespace =
         item => set('hm', trim(get('hm', item)), item)
     )
 
-const safeHMPParse = string => {
+const safeHMPParse = string => { // eslint-disable-line fp-jxl/no-nil
     try {
         const data = HMP.parse(string)
         return { ok: true, data }
@@ -147,9 +147,8 @@ const parsedComments =
             const { ok, data, error } = safeHMPParse(get('hm', item))
             if(ok) {
                 return set('hmParsed', data, item)
-            } else {
-                return set('hmParseFailure', error, item)
             }
+            return set('hmParseFailure', error, item)
         }
     )
 
@@ -168,19 +167,22 @@ const filterFailedParsing =
         item => isNil(item) === false
     )
 
-const tapConsole = label => (...args) => {
-    console.log.apply(console, [`${label}:`, ...args])
+// [jwarden 11.12.2018] TODO: Figure out how to support specific number tapConsoles, like tapConsole2, tapConsole3, etc.
+const tapConsole = label => (...args) => { // eslint-disable-line fp-jxl/no-rest-parameters
+    console.log.apply(console, [`${label}:`, ...args]) // eslint-disable-line fp-jxl/no-unused-expression
     return Promise.resolve.apply(Promise, args)
 }
 
-const tapDebug = label => (...args) => {
+// [jwarden 11.12.2018] TODO: Figure out how to support specific number tapDebug, like tapDebug2, tapDebug3, etc.
+const tapDebug = label => (...args) => { // eslint-disable-line fp-jxl/no-rest-parameters
     // debug.apply(debug, [label, ...args])
-    debug(label)
+    debug(label) // eslint-disable-line fp-jxl/no-unused-expression
     return Promise.resolve.apply(Promise, args)
 }
 
-const tapDebugAndShowArgs = label => (...args) => {
-    debug.apply(debug, [label, ...args])
+// [jwarden 11.12.2018] TODO: Figure out how to support specific number tapDebug, like tapDebugAndShowArgs2, tapDebugAndShowArgs3, etc.
+const tapDebugAndShowArgs = label => (...args) => { // eslint-disable-line fp-jxl/no-rest-parameters
+    debug.apply(debug, [label, ...args]) // eslint-disable-line fp-jxl/no-unused-expression
     return Promise.resolve.apply(Promise, args)
 }
 
@@ -245,20 +247,20 @@ const codeToMarkdown = code =>
     .then(tapDebug("codeToMarkdown, done."))
 
 const cleanEmptyResults = filesObject => {
-    debug("cleanEmptyResults, start:", filesObject)
+    debug("cleanEmptyResults, start:", filesObject) // eslint-disable-line fp-jxl/no-unused-expression
     const filenames = Object.keys(filesObject)
-    const cleanedObject = {}
-    forEach(
-        filename => {
-            const parsedComments = filesObject[filename]
-            // console.log("parsedComments:", parsedComments)
+    const cleanedObject = reduce(
+        (acc, filename) => {
+            const parsedComments = get([filename], filesObject)
             if(parsedComments.length > 0) {
-                cleanedObject[filename] = parsedComments
+                return {...acc, [filename]: parsedComments}
             }
-        },
-        filenames
+            return acc
+        }
+        , {}
+        , filenames
     )
-    debug("cleanEmptyResults, end:", cleanedObject)
+    debug("cleanEmptyResults, end:", cleanedObject) // eslint-disable-line fp-jxl/no-unused-expression
     return cleanedObject
 }
 
